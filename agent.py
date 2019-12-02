@@ -1,9 +1,12 @@
 
 from mesa import Agent
+import math
 GRID_INICIAL_X = 0
 GRID_INICIAL_Y = 0
 GRID_FINAL_X = 50
 GRID_FINAL_Y = 50
+YMURO_TORNIQUETES = GRID_FINAL_Y - math.floor(GRID_FINAL_Y * .3)
+YMURO_TREN = GRID_FINAL_Y - math.floor(GRID_FINAL_Y * .7)
 class Construccion(Agent):
     def __init__(self,unique_id, model, pos, transitable):
         super().__init__(unique_id, model)
@@ -20,12 +23,16 @@ class Muro(Construccion):
 class Torniquete(Construccion):
     def __init__(self,unique_id, model, pos, transitable):
         super().__init__(unique_id, model, pos, transitable)
+class Puerta(Construccion):
+    def __init__(self,unique_id, model, pos, transitable):
+        super().__init__(unique_id, model, pos, transitable)
 
 class Humano(Agent):
     def __init__(self,unique_id, model, pos):
         super().__init__(unique_id, model)
         self.direccion = True
         self.pos = pos
+        self.direccion = None
 
     def get_position(self):
         return self.pos
