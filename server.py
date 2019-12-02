@@ -3,7 +3,7 @@ from mesa.visualization.ModularVisualization import ModularServer #server
 from mesa.visualization.modules import ChartModule
 from mesa.visualization.UserParam import UserSettableParameter
 from model import miModelo #our model
-from agent import Humano, Muro
+from agent import Humano, Muro, Torniquete
 from agent import GRID_FINAL_X, GRID_FINAL_Y
 def agent_portrayal(agent): #here we define the design of agents
     if agent is None:
@@ -21,7 +21,7 @@ def agent_portrayal(agent): #here we define the design of agents
     # return portrayal 
     portrayal = {}
     if type(agent) is Humano:
-        portrayal["Layer"] = 2
+        portrayal["Layer"] = 1
         portrayal["scale"] = .8
         portrayal["Shape"] = "./resources/human.png"
         #portrayal["Shape"] = "circle"
@@ -36,6 +36,14 @@ def agent_portrayal(agent): #here we define the design of agents
         portrayal["Color"] = "black"
         portrayal["w"] = 1
         portrayal["h"] = 1
+    elif type(agent) is Torniquete:
+        portrayal["Layer"] = 1
+        #portrayal["Shape"] = "./resources/wall.png"
+        portrayal["Shape"] = "rect"
+        portrayal["Filled"] = "true"
+        portrayal["Color"] = "blue"
+        portrayal["w"] = 1
+        portrayal["h"] = 1
     return portrayal
 grid = CanvasGrid(agent_portrayal,GRID_FINAL_X,GRID_FINAL_Y,1000,1000)
 #chart = ChartModule([{"Label":"Nagentes","Color":"red"}],data_collector_name="datacollector")
@@ -43,4 +51,4 @@ grid = CanvasGrid(agent_portrayal,GRID_FINAL_X,GRID_FINAL_Y,1000,1000)
 server = ModularServer(miModelo,
                        [grid],
                        "Modelo del metro",
-                       {"N_humanos":200})  
+                       {"N_humanos":100})  

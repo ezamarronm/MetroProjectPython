@@ -5,20 +5,26 @@ GRID_INICIAL_Y = 0
 GRID_FINAL_X = 50
 GRID_FINAL_Y = 50
 class Construccion(Agent):
-    def __init__(self,unique_id, model, pos):
+    def __init__(self,unique_id, model, pos, transitable):
         super().__init__(unique_id, model)
         self.pos = pos
+        self.transitable = transitable
     def get_position(self):
         return self.pos
 
 class Muro(Construccion):
-    def __init__(self,unique_id, model, pos):
-        super().__init__(unique_id, model, pos)
-    def step(self):
-        print("Soy un muro")
+    def __init__(self,unique_id, model, pos,transitable):
+        super().__init__(unique_id, model, pos, transitable)
+    # def step(self):
+    #     print("Soy un muro")
+class Torniquete(Construccion):
+    def __init__(self,unique_id, model, pos, transitable):
+        super().__init__(unique_id, model, pos, transitable)
+
 class Humano(Agent):
     def __init__(self,unique_id, model, pos):
         super().__init__(unique_id, model)
+        self.direccion = True
         self.pos = pos
 
     def get_position(self):
@@ -31,4 +37,4 @@ class Humano(Agent):
         else:
             destino = (self.pos[0]+1,self.pos[1])
             self.model.grid.move_agent(self,destino)
-            print("Soy un humano")    
+            # print("Soy un humano")    
