@@ -3,6 +3,7 @@ from mesa.time import RandomActivation
 from mesa.space import MultiGrid
 from agent import Humano, Construccion, Muro, Torniquete, Puerta
 import math
+from random import randrange
 from agent import GRID_INICIAL_X, GRID_FINAL_X, GRID_INICIAL_Y, GRID_FINAL_Y, YMURO_TORNIQUETES,YMURO_TREN
 XTORNIQUETE_IZQ = math.floor(GRID_FINAL_X * .3)
 XTORNIQUETE_CTR = math.floor(GRID_FINAL_X * .5)
@@ -23,11 +24,12 @@ class miModelo(Model):
         pintarPuertas(self) #Dibuja todas las puertas
         pintarMuros(self);  #Dibuja todos los muros
         pintarHumanos(self,N_humanos)
-           
     def step(self):
         self.schedule.step()
-        if self.schedule.get_agent_count()<2:
-            self.running = False
+        pintarNuevosHumanos(self,1)
+        #N_humanos = self.random.randint(1,12)
+        #if self.schedule.get_agent_count()<2:
+        #    self.running = False
         print("---- End of tick ----")
 
 def pintarMuros(modelo):
@@ -76,12 +78,6 @@ def pintarPuertas(modelo):
         pintarPuerta(1,modelo,XPUERTA2 + i ,YMURO_TREN)
         pintarPuerta(1,modelo,XPUERTA3 + i ,YMURO_TREN)
         pintarPuerta(1,modelo,XPUERTA4 + i ,YMURO_TREN)
-        
-    # pintarPuerta(1,modelo,XPUERTA,YMURO_TREN)
-    # pintarPuerta(1,modelo,XPUERTA1,YMURO_TREN)
-    # pintarPuerta(1,modelo,XPUERTA1,YMURO_TREN)
-    # pintarPuerta(1,modelo,XPUERTA1,YMURO_TREN)
-    # pintarPuerta(1,modelo,XPUERTA1,YMURO_TREN)
 
 
 def pintarPuerta(i,modelo, pos_x,pos_y):
@@ -99,10 +95,15 @@ def pintarHumanos(modelo,N_humanos):
             a = Humano(contador,modelo,(pos_x,pos_y)) #Creacion del humano
             modelo.schedule.add(a)
             modelo.grid.place_agent(a, a.pos) #Coloca  en la posicion creada    
-    
 
-    
-
-    
-
-   
+def pintarNuevosHumanos(modelo,N_humanos):
+    contador = 0
+    #lista = [GRID_FINAL_X, GRID_INICIAL_X]
+    #random_index = randrange(len(lista)-1)
+    while contador < N_humanos:
+        pos_x = 20 #Posicion x del humano
+        pos_y = 20 #GRID_FINAL_Y #Posicion y del humano
+        contador+=1
+        a = Humano(contador,modelo,(pos_x,pos_y)) #Creacion del humano
+        modelo.schedule.add(a)
+        modelo.grid.place_agent(a, a.pos) #Coloca  en la posicion creada

@@ -30,18 +30,32 @@ class Puerta(Construccion):
 class Humano(Agent):
     def __init__(self,unique_id, model, pos):
         super().__init__(unique_id, model)
-        self.direccion = True
         self.pos = pos
-        self.direccion = None
+        self.direccion = self.set_direction()
 
     def get_position(self):
         return self.pos
     
+    def set_direction(self):
+        if self.pos[1] < YMURO_TREN:
+            return False #False caminan hacia arriba
+        elif self.pos[1] >= YMURO_TREN:
+            return True #True caminan hacia abajo
+        else:
+            print("Algo salio mal al caminar")
+
     def step(self):
         if self.pos[0] == GRID_INICIAL_X or self.pos[0] == GRID_FINAL_X -2  or self.pos[1] == GRID_INICIAL_Y or self.pos[1] == GRID_FINAL_Y -2:
             self.model.schedule.remove(self)
             self.model.grid.remove_agent(self)
+            print("Humano eliminado")
         else:
-            destino = (self.pos[0]+1,self.pos[1])
+            if self.direccion == True:
+                destino = (self.pos[0],self.pos[1]-1)
+            else:
+                destino = (self.pos[0],self.pos[1]+1)
             self.model.grid.move_agent(self,destino)
+            print("Me movi a ", destino)
+
+        
             # print("Soy un humano")    
