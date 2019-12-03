@@ -28,8 +28,8 @@ class Puerta(Construccion):
         super().__init__(unique_id, model, pos, transitable)
 
 class Humano(Agent):
-    def __init__(self,unique_id, model, pos):
-        super().__init__(unique_id, model)
+    def __init__(self, model, pos):
+        super().__init__(self,model)
         self.pos = pos
         self.direccion = self.set_direction()
 
@@ -45,7 +45,7 @@ class Humano(Agent):
             print("Algo salio mal al caminar")
 
     def step(self):
-        if self.pos[0] == GRID_INICIAL_X or self.pos[0] == GRID_FINAL_X -2  or self.pos[1] == GRID_INICIAL_Y or self.pos[1] == GRID_FINAL_Y -2:
+        if self.pos[0] == GRID_INICIAL_X or self.pos[0] == GRID_FINAL_X -1  or self.pos[1] == GRID_INICIAL_Y or self.pos[1] == GRID_FINAL_Y -1:
             self.model.schedule.remove(self)
             self.model.grid.remove_agent(self)
             print("Humano eliminado")

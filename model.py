@@ -92,18 +92,24 @@ def pintarHumanos(modelo,N_humanos):
         pos_y = modelo.random.randint(GRID_INICIAL_Y + 1 ,GRID_FINAL_Y - 2) #Posicion y del humano
         if pos_y != YMURO_TORNIQUETES and pos_y !=  YMURO_TREN:
             contador+=1
-            a = Humano(contador,modelo,(pos_x,pos_y)) #Creacion del humano
+            a = Humano(modelo,(pos_x,pos_y)) #Creacion del humano
             modelo.schedule.add(a)
             modelo.grid.place_agent(a, a.pos) #Coloca  en la posicion creada    
 
 def pintarNuevosHumanos(modelo,N_humanos):
     contador = 0
     #lista = [GRID_FINAL_X, GRID_INICIAL_X]
-    #random_index = randrange(len(lista)-1)
-    while contador < N_humanos:
-        pos_x = 20 #Posicion x del humano
-        pos_y = 20 #GRID_FINAL_Y #Posicion y del humano
-        contador+=1
-        a = Humano(contador,modelo,(pos_x,pos_y)) #Creacion del humano
+    
+    #while contador < N_humanos:
+    if modelo.random.randint(0,1):
+        if modelo.random.randint(0,1):
+            pos_x = GRID_FINAL_X -2 #Posicion x del humano
+            pos_y = GRID_FINAL_Y -2 #GRID_FINAL_Y #Posicion y del humano
+            #contador+=1
+        else:
+            pos_x = GRID_INICIAL_X +1 #Posicion x del humano
+            pos_y = GRID_FINAL_Y -2 #GRID_FINAL_Y #Posicion y del humano
+            print("Hello")
+        a = Humano(modelo,(pos_x,pos_y)) #Creacion del humano
         modelo.schedule.add(a)
         modelo.grid.place_agent(a, a.pos) #Coloca  en la posicion creada
