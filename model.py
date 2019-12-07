@@ -108,9 +108,9 @@ def pintarHumanos(modelo,N_humanos):
             a = Humano(modelo,(pos_x,pos_y)) #Creacion del humano
             modelo.schedule.add(a)
             modelo.grid.place_agent(a, a.pos) #Coloca  en la posicion creada
-    # humanoPrueba = Humano(modelo,(40,40))
-    # modelo.schedule.add(humanoPrueba)
-    # modelo.grid.place_agent(humanoPrueba, humanoPrueba.pos) #Coloca  en la posicion creada
+    humanoPrueba = Humano(modelo,(40,40))
+    modelo.schedule.add(humanoPrueba)
+    modelo.grid.place_agent(humanoPrueba, humanoPrueba.pos) #Coloca  en la posicion creada
     #for i in range(0,4):
     #    humanoPrueba2 = Humano(modelo,(41,40))
     #    modelo.schedule.add(humanoPrueba2)
