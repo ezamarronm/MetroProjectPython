@@ -3,7 +3,7 @@ from mesa.visualization.ModularVisualization import ModularServer #server
 from mesa.visualization.modules import ChartModule
 from mesa.visualization.UserParam import UserSettableParameter
 from model import miModelo #our model
-from agent import Humano, Muro, Torniquete, Puerta
+from agent import Humano, Muro, TorniqueteEntrada, TorniqueteSalida, Puerta
 from agent import GRID_FINAL_X, GRID_FINAL_Y
 def agent_portrayal(agent): #here we define the design of agents
     if agent is None:
@@ -36,12 +36,20 @@ def agent_portrayal(agent): #here we define the design of agents
         portrayal["Color"] = "black"
         portrayal["w"] = 1
         portrayal["h"] = 1
-    elif type(agent) is Torniquete:
+    elif type(agent) is TorniqueteEntrada:
         portrayal["Layer"] = 1
         #portrayal["Shape"] = "./resources/wall.png"
         portrayal["Shape"] = "rect"
         portrayal["Filled"] = "true"
         portrayal["Color"] = "blue"
+        portrayal["w"] = 1
+        portrayal["h"] = 1
+    elif type(agent) is TorniqueteSalida:
+        portrayal["Layer"] = 1
+        #portrayal["Shape"] = "./resources/wall.png"
+        portrayal["Shape"] = "rect"
+        portrayal["Filled"] = "true"
+        portrayal["Color"] = "yellow"
         portrayal["w"] = 1
         portrayal["h"] = 1
     elif type(agent) is Puerta:

@@ -20,7 +20,10 @@ class Muro(Construccion):
         super().__init__(unique_id, model, pos, transitable)
     # def step(self):
     #     print("Soy un muro")
-class Torniquete(Construccion):
+class TorniqueteEntrada(Construccion):
+    def __init__(self,unique_id, model, pos, transitable):
+        super().__init__(unique_id, model, pos, transitable)
+class TorniqueteSalida(Construccion):
     def __init__(self,unique_id, model, pos, transitable):
         super().__init__(unique_id, model, pos, transitable)
 class Puerta(Construccion):
@@ -43,10 +46,34 @@ class Humano(Agent):
             return True #True caminan hacia abajo
         else:
             print("Algo salio mal al caminar")
-    def elegirTorniquete(self,modelo):
-        print("Hello")
-        torniquetes = modelo.getTorniquetes()
-        print(torniquetes)
+    def elegirTorniquete(self,modelo, posHumano):
+        distancias = []
+        torniquetes = modelo.getTorniquetesEntrada()
+        for torniquete in torniquetes:
+            distancias.append( math.pow( posHumano[0] - torniquete[0], 2) + math.pow(posHumano[1] - torniquete[1], 2) )
+        #print(min(distancias))
+        #print(distancias.index(min(distancias)))
+        return torniquetes[ distancias.index(min(distancias)) ] 
+        
+        #print(distancias)
+        #print (posHumano)
+    def obtenerDestinosPosibles(self):
+        destinosPosibles = []
+        vecindad = self.model.grid.get_neighborhood(self.pos,moore=True,include_center=False, radius = 1)
+        for vecino in vecindad:
+            humanosCerca = self.model.grid.get_neighbors(vecino,moore=True, include_center=True,radius=0)
+            vecinos = [x for x in humanosCerca if type(x) is Humano and x!=self]
+            if len(vecinos) < 3:
+                destinosPosibles.append(vecino)
+        #print(self.pos)
+        #print(destinosPosibles)
+        return destinosPosibles
+    def obtenerDestino(self, destinosPosibles, torniqueteDestino):
+        distancias = [] 
+        for destinoSiguiente in destinosPosibles:
+             distancias.append( math.pow( destinoSiguiente[0] - torniqueteDestino[0], 2) + math.pow(destinoSiguiente[1] - torniqueteDestino[1], 2) )
+        return destinosPosibles[ distancias.index(min(distancias)) ]
+
 
 
     def step(self):
@@ -55,10 +82,15 @@ class Humano(Agent):
             self.model.grid.remove_agent(self)
             print("Humano eliminado")
         else:
-            if self.pos[1] > YMURO_TORNIQUETES and self.direccion == True:
-                destino = (self.pos[0],self.pos[1]-1)
-                torniqueteDestino = self.elegirTorniquete(self.model)
+            if self.pos[1] > YMURO_TORNIQUETES and self.direccion == True: #Si esta afuera de los torniquetes
                 #destino = (self.pos[0],self.pos[1]-1)
+                torniqueteDestino = self.elegirTorniquete(self.model, self.pos)
+                destinosPosibles = self.obtenerDestinosPosibles()
+                destino = self.obtenerDestino(destinosPosibles,torniqueteDestino)
+                #destino = (self.pos[0],self.pos[1]-1)
+                print("El torniquete destino es ", torniqueteDestino)
+                print("Los destinos posibles son" , destinosPosibles)
+                print("El destino siguiente es ", destino)
             elif self.pos[1] < YMURO_TORNIQUETES and self.pos[1] > YMURO_TREN and self.direccion == True:
                 destino = self.pos
             elif self.pos[1] < YMURO_TREN and self.direccion == False:
