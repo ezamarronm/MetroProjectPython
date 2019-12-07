@@ -63,10 +63,17 @@ class Humano(Agent):
         for vecino in vecindad:
             humanosCerca = self.model.grid.get_neighbors(vecino,moore=True, include_center=True,radius=0)
             vecinos = [x for x in humanosCerca if type(x) is Humano and x!=self]
+
             if len(vecinos) < 3:
                 destinosPosibles.append(vecino)
+                obstaculosCerca = self.model.grid.get_neighbors(vecino,moore=True, include_center=True,radius=0)
+                obstaculos = [x for x in humanosCerca if type(x) is not Humano and x!=self if type(x) is not TorniqueteEntrada] 
+                if len(obstaculos) > 0:
+                    destinosPosibles.remove(vecino)
         #print(self.pos)
         #print(destinosPosibles)
+        if destinosPosibles == []:
+            destinosPosibles.append(self.pos)
         return destinosPosibles
     def obtenerDestino(self, destinosPosibles, torniqueteDestino):
         distancias = [] 

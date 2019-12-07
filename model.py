@@ -28,7 +28,7 @@ class miModelo(Model):
         pintarHumanos(self,N_humanos)
     def step(self):
         self.schedule.step()
-        pintarNuevosHumanos(self,1)
+        #pintarNuevosHumanos(self,1)
         #N_humanos = self.random.randint(1,12)
         #if self.schedule.get_agent_count()<2:
         #    self.running = False

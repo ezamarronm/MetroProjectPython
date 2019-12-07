@@ -67,4 +67,4 @@ grid = CanvasGrid(agent_portrayal,GRID_FINAL_X,GRID_FINAL_Y,1000,1000)
 server = ModularServer(miModelo,
                        [grid],
                        "Modelo del metro",
-                       {"N_humanos":10})  
+                       {"N_humanos":100})  
