@@ -19,7 +19,7 @@ class miModelo(Model):
         self.running = True
         self.schedule = RandomActivation(self)        
         self.grid = MultiGrid(GRID_FINAL_X,GRID_FINAL_Y,False)   
-
+        self.posTorniquetes = []
         pintarTorniquetes(self) #Dibuja los torniquetes
         pintarPuertas(self) #Dibuja todas las puertas
         pintarMuros(self);  #Dibuja todos los muros
@@ -31,6 +31,9 @@ class miModelo(Model):
         #if self.schedule.get_agent_count()<2:
         #    self.running = False
         print("---- End of tick ----")
+    def getTorniquetes(self):
+        #return [(),(),()]
+        return self.posTorniquetes
 
 def pintarMuros(modelo):
     pintarMuro(modelo, GRID_INICIAL_X, GRID_FINAL_X, GRID_FINAL_Y - 1, GRID_FINAL_Y - 1) #Superior
@@ -71,6 +74,7 @@ def pintarTorniquete(i,modelo, pos_x,pos_y):
     a = Torniquete(i,modelo,(pos_x,pos_y),True)
     modelo.schedule.add(a)
     modelo.grid.place_agent(a, a.pos)
+    modelo.posTorniquetes.append(a.pos)
 
 def pintarPuertas(modelo):
     for i in range(-1,2):

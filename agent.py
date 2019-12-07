@@ -43,6 +43,11 @@ class Humano(Agent):
             return True #True caminan hacia abajo
         else:
             print("Algo salio mal al caminar")
+    def elegirTorniquete(self,modelo):
+        print("Hello")
+        torniquetes = modelo.getTorniquetes()
+        print(torniquetes)
+
 
     def step(self):
         if self.pos[0] == GRID_INICIAL_X or self.pos[0] == GRID_FINAL_X -1  or self.pos[1] == GRID_INICIAL_Y or self.pos[1] == GRID_FINAL_Y -1:
@@ -50,12 +55,17 @@ class Humano(Agent):
             self.model.grid.remove_agent(self)
             print("Humano eliminado")
         else:
-            if self.direccion == True:
+            if self.pos[1] > YMURO_TORNIQUETES and self.direccion == True:
                 destino = (self.pos[0],self.pos[1]-1)
-            else:
+                torniqueteDestino = self.elegirTorniquete(self.model)
+                #destino = (self.pos[0],self.pos[1]-1)
+            elif self.pos[1] < YMURO_TORNIQUETES and self.pos[1] > YMURO_TREN and self.direccion == True:
+                destino = self.pos
+            elif self.pos[1] < YMURO_TREN and self.direccion == False:
                 destino = (self.pos[0],self.pos[1]+1)
+            else:
+                destino = (0,0)
             self.model.grid.move_agent(self,destino)
-            print("Me movi a ", destino)
-
+            #print("Me movi a ", destino)
         
             # print("Soy un humano")    
