@@ -73,15 +73,15 @@ class Humano(Agent):
                 obstaculos = [x for x in humanosCerca if type(x) is not Humano and x!=self if type(x) is not TorniqueteEntrada] 
                 if len(obstaculos) > 0:
                     destinosPosibles.remove(vecino)
-        if torniqueteDestino in destinosPosibles:
-            ObjetosEnTorniquete = self.model.grid.get_neighbors(torniqueteDestino,moore=True, include_center=True,radius=0)
-            HumanosEnTorniquete = [x for x in ObjetosEnTorniquete if type(x) is Humano and x!=self]
-            print(HumanosEnTorniquete)
-            if len(HumanosEnTorniquete) > 0:
-                print(HumanosEnTorniquete)
-                return [self.pos]
-            else:
-                return [torniqueteDestino]
+        # if torniqueteDestino in destinosPosibles:
+        #     ObjetosEnTorniquete = self.model.grid.get_neighbors(torniqueteDestino,moore=True, include_center=True,radius=0)
+        #     HumanosEnTorniquete = [x for x in ObjetosEnTorniquete if type(x) is Humano and x!=self]
+        #     print(HumanosEnTorniquete)
+        #     if len(HumanosEnTorniquete) > 0:
+        #         print(HumanosEnTorniquete)
+        #         return [self.pos]
+        #     else:
+        #         return [torniqueteDestino]
         #print(self.pos)
         #print(destinosPosibles)
         if destinosPosibles == []:
