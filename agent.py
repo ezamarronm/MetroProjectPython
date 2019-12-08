@@ -57,7 +57,7 @@ class Humano(Agent):
         
         #print(distancias)
         #print (posHumano)
-    def obtenerDestinosPosibles(self):
+    def obtenerDestinosPosibles(self,torniqueteDestino):
         destinosPosibles = []
         vecindad = self.model.grid.get_neighborhood(self.pos,moore=True,include_center=False, radius = 1)
         for vecino in vecindad:
@@ -70,6 +70,14 @@ class Humano(Agent):
                 obstaculos = [x for x in humanosCerca if type(x) is not Humano and x!=self if type(x) is not TorniqueteEntrada] 
                 if len(obstaculos) > 0:
                     destinosPosibles.remove(vecino)
+        if torniqueteDestino in destinosPosibles:
+            ObjetosEnTorniquete = self.model.grid.get_neighbors(torniqueteDestino,moore=True, include_center=True,radius=0)
+            HumanosEnTorniquete = [x for x in ObjetosEnTorniquete if type(x) is Humano and x!=self]
+            print(HumanosEnTorniquete)
+            if len(HumanosEnTorniquete) > 0:
+                return [self.pos]
+            else:
+                return [torniqueteDestino]
         #print(self.pos)
         #print(destinosPosibles)
         if destinosPosibles == []:
@@ -87,17 +95,17 @@ class Humano(Agent):
         if self.pos[0] == GRID_INICIAL_X or self.pos[0] == GRID_FINAL_X -1  or self.pos[1] == GRID_INICIAL_Y or self.pos[1] == GRID_FINAL_Y -1:
             self.model.schedule.remove(self)
             self.model.grid.remove_agent(self)
-            print("Humano eliminado")
+            #print("Humano eliminado")
         else:
             if self.pos[1] > YMURO_TORNIQUETES and self.direccion == True: #Si esta afuera de los torniquetes
                 #destino = (self.pos[0],self.pos[1]-1)
                 torniqueteDestino = self.elegirTorniquete(self.model, self.pos)
-                destinosPosibles = self.obtenerDestinosPosibles()
+                destinosPosibles = self.obtenerDestinosPosibles(torniqueteDestino)
                 destino = self.obtenerDestino(destinosPosibles,torniqueteDestino)
                 #destino = (self.pos[0],self.pos[1]-1)
-                print("El torniquete destino es ", torniqueteDestino)
-                print("Los destinos posibles son" , destinosPosibles)
-                print("El destino siguiente es ", destino)
+                # print("El torniquete destino es ", torniqueteDestino)
+                # print("Los destinos posibles son" , destinosPosibles)
+                # print("El destino siguiente es ", destino)
             elif self.pos[1] < YMURO_TORNIQUETES and self.pos[1] > YMURO_TREN and self.direccion == True:
                 destino = self.pos
             elif self.pos[1] < YMURO_TREN and self.direccion == False:

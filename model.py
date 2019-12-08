@@ -27,6 +27,7 @@ class miModelo(Model):
         pintarMuros(self);  #Dibuja todos los muros
         pintarHumanos(self,N_humanos)
     def step(self):
+        print("Start tick")
         self.schedule.step()
         #pintarNuevosHumanos(self,1)
         #N_humanos = self.random.randint(1,12)
@@ -75,7 +76,7 @@ def pintarTorniquetes(modelo):
 def pintarTorniquete(i,modelo, pos_x,pos_y,EoS): #EoS es Entrada (True), Salida (False)
     if EoS:
         a = TorniqueteEntrada(i,modelo,(pos_x,pos_y),True) #True/Transitable False/NoTransitable
-        print("la posicion del torniquete es", a.pos)
+        #print("la posicion del torniquete es", a.pos)
     else:
         a = TorniqueteSalida(i,modelo,(pos_x,pos_y),True)
     modelo.schedule.add(a)
