@@ -46,6 +46,9 @@ class Humano(Agent):
             return True #True caminan hacia abajo
         else:
             print("Algo salio mal al caminar")
+# 
+# HACIA TORNIQUETES DE ENTRADA
+# 
     def elegirTorniquete(self,modelo, posHumano):
         distancias = []
         torniquetes = modelo.getTorniquetesEntrada()
@@ -75,6 +78,7 @@ class Humano(Agent):
             HumanosEnTorniquete = [x for x in ObjetosEnTorniquete if type(x) is Humano and x!=self]
             print(HumanosEnTorniquete)
             if len(HumanosEnTorniquete) > 0:
+                print(HumanosEnTorniquete)
                 return [self.pos]
             else:
                 return [torniqueteDestino]
@@ -88,28 +92,67 @@ class Humano(Agent):
         for destinoSiguiente in destinosPosibles:
              distancias.append( math.pow( destinoSiguiente[0] - torniqueteDestino[0], 2) + math.pow(destinoSiguiente[1] - torniqueteDestino[1], 2) )
         return destinosPosibles[ distancias.index(min(distancias)) ]
+# 
+# HACIA LAS PUERTAS
+# 
+    def elegirPuerta(self,modelo, posHumano):
+        distancias = []
+        puertas = modelo.getPuertas()
+        for puerta in puertas:
+            distancias.append( math.pow( posHumano[0] - puerta[0], 2) + math.pow(posHumano[1] - puerta[1], 2) )
+        #print(min(distancias))
+        #print(distancias.index(min(distancias)))
+        return puertas[ distancias.index(min(distancias)) ] 
 
+    def obtenerDestinosPosiblesPuertas(self,puertaDestino):
+            destinosPosibles = []
+            vecindad = self.model.grid.get_neighborhood(self.pos,moore=True,include_center=False, radius = 1)
+            for vecino in vecindad:
+                humanosCerca = self.model.grid.get_neighbors(vecino,moore=True, include_center=True,radius=0)
+                vecinos = [x for x in humanosCerca if type(x) is Humano and x!=self]
 
-
+                if len(vecinos) < 3:
+                    destinosPosibles.append(vecino)
+                    obstaculosCerca = self.model.grid.get_neighbors(vecino,moore=True, include_center=True,radius=0)
+                    obstaculos = [x for x in humanosCerca if type(x) is not Humano and x!=self if type(x) is not Puerta] 
+                    if len(obstaculos) > 0:
+                        destinosPosibles.remove(vecino)
+            if puertaDestino in destinosPosibles:
+                ObjetosEnPuerta = self.model.grid.get_neighbors(puertaDestino,moore=True, include_center=True,radius=0)
+                HumanosEnPuerta = [x for x in ObjetosEnPuerta if type(x) is Humano and x!=self]
+                print(HumanosEnPuerta)
+                if len(HumanosEnPuerta) > 0:
+                    return [self.pos]
+                else:
+                    return [puertaDestino]
+            #print(self.pos)
+            #print(destinosPosibles)
+            if destinosPosibles == []:
+                destinosPosibles.append(self.pos)
+            return destinosPosibles
     def step(self):
         if self.pos[0] == GRID_INICIAL_X or self.pos[0] == GRID_FINAL_X -1  or self.pos[1] == GRID_INICIAL_Y or self.pos[1] == GRID_FINAL_Y -1:
             self.model.schedule.remove(self)
             self.model.grid.remove_agent(self)
-            #print("Humano eliminado")
+            print("Humano eliminado")
         else:
             if self.pos[1] > YMURO_TORNIQUETES and self.direccion == True: #Si esta afuera de los torniquetes
                 #destino = (self.pos[0],self.pos[1]-1)
                 torniqueteDestino = self.elegirTorniquete(self.model, self.pos)
-                destinosPosibles = self.obtenerDestinosPosibles(torniqueteDestino)
+                destinosPosibles = self.obtenerDestinosPosiblesPuertas(torniqueteDestino)
                 destino = self.obtenerDestino(destinosPosibles,torniqueteDestino)
                 #destino = (self.pos[0],self.pos[1]-1)
                 # print("El torniquete destino es ", torniqueteDestino)
                 # print("Los destinos posibles son" , destinosPosibles)
                 # print("El destino siguiente es ", destino)
             elif self.pos[1] < YMURO_TORNIQUETES and self.pos[1] > YMURO_TREN and self.direccion == True:
+                #PuertaDestino = self.elegirPuerta(self.model, self.pos)
+                #destinosPosibles = self.obtenerDestinosPosibles(PuertaDestino)
+                #destino = self.obtenerDestino(destinosPosibles,PuertaDestino)
                 destino = self.pos
             elif self.pos[1] < YMURO_TREN and self.direccion == False:
-                destino = (self.pos[0],self.pos[1]+1)
+                #destino = (self.pos[0],self.pos[1]+1)
+                destino = self.pos
             else:
                 destino = (0,0)
             self.model.grid.move_agent(self,destino)

@@ -21,7 +21,7 @@ class miModelo(Model):
         self.grid = MultiGrid(GRID_FINAL_X,GRID_FINAL_Y,False)   
         self.posTorniquetesEntrada = []
         self.posTorniquetesSalida = []
-        self.posTorniquetesPuertas = []
+        self.posPuertas = []
         pintarTorniquetes(self) #Dibuja los torniquetes
         pintarPuertas(self) #Dibuja todas las puertas
         pintarMuros(self);  #Dibuja todos los muros
@@ -37,6 +37,9 @@ class miModelo(Model):
     def getTorniquetesEntrada(self):
         #return [(),(),()]
         return self.posTorniquetesEntrada
+    def getPuertas(self):
+        #return [(),(),()]
+        return self.posPuertas
 
 def pintarMuros(modelo):
     pintarMuro(modelo, GRID_INICIAL_X, GRID_FINAL_X, GRID_FINAL_Y - 1, GRID_FINAL_Y - 1) #Superior
@@ -98,6 +101,7 @@ def pintarPuerta(i,modelo, pos_x,pos_y):
     a = Puerta(i,modelo,(pos_x,pos_y),True)
     modelo.schedule.add(a)
     modelo.grid.place_agent(a, a.pos)
+    modelo.posPuertas.append(a.pos)
 
 def pintarHumanos(modelo,N_humanos):
     contador = 0
