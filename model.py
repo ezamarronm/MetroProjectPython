@@ -45,6 +45,8 @@ class miModelo(Model):
         return self.posPuertas
     def getUInteriores(self):
         return self.posUInteriores
+    def getTorniquetesSalida(self):
+        return self.posTorniquetesSalida
 
 def pintarMuros(modelo):
     pintarMuro(modelo, GRID_INICIAL_X, GRID_FINAL_X, GRID_FINAL_Y - 1, GRID_FINAL_Y - 1) #Superior
@@ -84,7 +86,6 @@ def pintarTorniquetes(modelo):
 def pintarTorniquete(i,modelo, pos_x,pos_y,EoS): #EoS es Entrada (True), Salida (False)
     if EoS:
         a = TorniqueteEntrada(i,modelo,(pos_x,pos_y),True) #True/Transitable False/NoTransitable
-        #print("la posicion del torniquete es", a.pos)
     else:
         a = TorniqueteSalida(i,modelo,(pos_x,pos_y),True)
     modelo.schedule.add(a)
@@ -118,9 +119,9 @@ def pintarHumanos(modelo,N_humanos):
             a = Humano(modelo,(pos_x,pos_y)) #Creacion del humano
             modelo.schedule.add(a)
             modelo.grid.place_agent(a, a.pos) #Coloca  en la posicion creada
-    humanoPrueba = Humano(modelo,(40,40))
-    modelo.schedule.add(humanoPrueba)
-    modelo.grid.place_agent(humanoPrueba, humanoPrueba.pos) #Coloca  en la posicion creada
+    #humanoPrueba = Humano(modelo,(40,40))
+    #modelo.schedule.add(humanoPrueba)
+    #modelo.grid.place_agent(humanoPrueba, humanoPrueba.pos) #Coloca  en la posicion creada
     #for i in range(0,4):
     #    humanoPrueba2 = Humano(modelo,(41,40))
     #    modelo.schedule.add(humanoPrueba2)
@@ -140,11 +141,13 @@ def pintarNuevosHumanos(modelo,N_humanos):
         else:
             pos_x = GRID_INICIAL_X +1 #Posicion x del humano
             pos_y = GRID_FINAL_Y -2 #GRID_FINAL_Y #Posicion y del humano
-            #print("Hello")
-        for i in range (0,10):
-            a = Humano(modelo,(pos_x,pos_y)) #Creacion del humano
-            modelo.schedule.add(a)
-            modelo.grid.place_agent(a, a.pos) #Coloca  en la posicion creada
+        # for i in range (0,10):
+        #     a = Humano(modelo,(pos_x,pos_y)) #Creacion del humano
+        #     modelo.schedule.add(a)
+        #     modelo.grid.place_agent(a, a.pos) #Coloca  en la posicion creada
+        a = Humano(modelo,(pos_x,pos_y)) #Creacion del humano
+        modelo.schedule.add(a)
+        modelo.grid.place_agent(a, a.pos) #Coloca  en la posicion creada
 def calcularUInteriores():
     i = .1
     lista = []
