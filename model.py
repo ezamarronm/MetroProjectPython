@@ -14,6 +14,8 @@ XPUERTA2 = math.floor(GRID_FINAL_X * .4)
 XPUERTA3 = math.floor(GRID_FINAL_X * .6)
 XPUERTA4 = math.floor(GRID_FINAL_X * .8)
 
+X_U_INTERIOR1 = math.floor(GRID_FINAL_X * .1)
+
 class miModelo(Model):
     def __init__(self,N_humanos):
         self.running = True
@@ -22,6 +24,7 @@ class miModelo(Model):
         self.posTorniquetesEntrada = []
         self.posTorniquetesSalida = []
         self.posPuertas = []
+        self.posUInteriores = calcularUInteriores()
         pintarTorniquetes(self) #Dibuja los torniquetes
         pintarPuertas(self) #Dibuja todas las puertas
         pintarMuros(self);  #Dibuja todos los muros
@@ -40,6 +43,8 @@ class miModelo(Model):
     def getPuertas(self):
         #return [(),(),()]
         return self.posPuertas
+    def getUInteriores(self):
+        return self.posUInteriores
 
 def pintarMuros(modelo):
     pintarMuro(modelo, GRID_INICIAL_X, GRID_FINAL_X, GRID_FINAL_Y - 1, GRID_FINAL_Y - 1) #Superior
@@ -140,4 +145,11 @@ def pintarNuevosHumanos(modelo,N_humanos):
             a = Humano(modelo,(pos_x,pos_y)) #Creacion del humano
             modelo.schedule.add(a)
             modelo.grid.place_agent(a, a.pos) #Coloca  en la posicion creada
-    
+def calcularUInteriores():
+    i = .1
+    lista = []
+    while GRID_FINAL_X * i < GRID_FINAL_X:
+        lista.append( ( round (GRID_FINAL_X * i)  , ( math.floor(YMURO_TREN*.5)  )) )
+        i = i + .2
+    return lista
+

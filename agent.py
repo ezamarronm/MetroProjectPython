@@ -46,9 +46,9 @@ class Humano(Agent):
             return True #True caminan hacia abajo
         else:
             print("Algo salio mal al caminar")
-# 
-# HACIA TORNIQUETES DE ENTRADA
-# 
+    # 
+    # HACIA TORNIQUETES DE ENTRADA
+    # 
     def elegirTorniquete(self,modelo, posHumano):
         distancias = []
         torniquetes = modelo.getTorniquetesEntrada()
@@ -77,11 +77,11 @@ class Humano(Agent):
             ObjetosEnTorniquete = self.model.grid.get_neighbors(torniqueteDestino,moore=True, include_center=True,radius=0)
             HumanosEnTorniquete = [x for x in ObjetosEnTorniquete if type(x) is Humano and x!=self]
             #print(HumanosEnTorniquete)
-            if len(HumanosEnTorniquete) > 0:
+            if len(HumanosEnTorniquete) > 2:
                 return [self.pos]
             else:
                 return [torniqueteDestino]
-        print(self.pos)
+        #print(self.pos)
         #print(destinosPosibles)
         if destinosPosibles == []:
             destinosPosibles.append(self.pos)
@@ -91,9 +91,9 @@ class Humano(Agent):
         for destinoSiguiente in destinosPosibles:
              distancias.append( math.pow( destinoSiguiente[0] - torniqueteDestino[0], 2) + math.pow(destinoSiguiente[1] - torniqueteDestino[1], 2) )
         return destinosPosibles[ distancias.index(min(distancias)) ]
-# 
-# HACIA LAS PUERTAS
-# 
+    # 
+    # HACIA LAS PUERTAS
+    # 
     def elegirPuerta(self,modelo, posHumano):
         distancias = []
         puertas = modelo.getPuertas()
@@ -129,6 +129,23 @@ class Humano(Agent):
             if destinosPosibles == []:
                 destinosPosibles.append(self.pos)
             return destinosPosibles
+    # 
+    # DENTRO DE LAS PUERTAS
+    # 
+    def elegirUInterior(self,modelo, posHumano):
+        distancias = []
+        uInteriores = modelo.getUInteriores()
+        print(uInteriores)
+        for uInterior in uInteriores:
+            distancias.append( math.pow( posHumano[0] - uInterior[0], 2) + math.pow(posHumano[1] - uInterior[1], 2) )
+        #print(min(distancias))
+        #print(distancias.index(min(distancias)))
+        return uInteriores[ distancias.index(min(distancias)) ] 
+
+
+    #
+    # EN CADA TICK
+    #
     def step(self):
         if self.pos[0] == GRID_INICIAL_X or self.pos[0] == GRID_FINAL_X -1  or self.pos[1] == GRID_INICIAL_Y or self.pos[1] == GRID_FINAL_Y -1:
             self.model.schedule.remove(self)
@@ -136,22 +153,22 @@ class Humano(Agent):
             print("Humano eliminado")
         else:
             if self.pos[1] > YMURO_TORNIQUETES and self.direccion == True: #Si esta afuera de los torniquetes
-                #destino = (self.pos[0],self.pos[1]-1)
                 torniqueteDestino = self.elegirTorniquete(self.model, self.pos)
                 destinosPosibles = self.obtenerDestinosPosibles(torniqueteDestino)
                 destino = self.obtenerDestino(destinosPosibles,torniqueteDestino)
-                #destino = (self.pos[0],self.pos[1]-1)
-                # print("El torniquete destino es ", torniqueteDestino)
-                # print("Los destinos posibles son" , destinosPosibles)
-                # print("El destino siguiente es ", destino)
-            elif self.pos[1] <= YMURO_TORNIQUETES and self.pos[1] > YMURO_TREN and self.direccion == True:
+
+            elif self.pos[1] <= YMURO_TORNIQUETES and self.pos[1] > YMURO_TREN and self.direccion == True: #Si estan dentro de la estacion y van a la puerta
                 PuertaDestino = self.elegirPuerta(self.model, self.pos)
-                destinosPosibles = self.obtenerDestinosPosibles(PuertaDestino)
+                destinosPosibles = self.obtenerDestinosPosiblesPuertas(PuertaDestino)
                 destino = self.obtenerDestino(destinosPosibles,PuertaDestino)
-                #destino = self.pos
-            elif self.pos[1] < YMURO_TREN and self.direccion == False:
-                #destino = (self.pos[0],self.pos[1]+1)
-                destino = self.pos
+
+            elif self.pos[1] <= YMURO_TREN and self.direccion == True: #Si estan en la puerta y van a entrar al metro
+                centroDestino = self.elegirUInterior(self.model, self.pos)
+                print(centroDestino)
+                destinosPosibles = self.obtenerDestinosPosiblesPuertas(centroDestino)
+                destino = self.obtenerDestino(destinosPosibles,centroDestino)
+            elif self.pos[1] <= YMURO_TREN and self.direccion == False:
+                destino = (self.pos[0],self.pos[1]+1)
             else:
                 destino = (0,0)
             self.model.grid.move_agent(self,destino)
