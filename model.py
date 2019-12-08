@@ -29,10 +29,10 @@ class miModelo(Model):
     def step(self):
         print("Start tick")
         self.schedule.step()
-        #pintarNuevosHumanos(self,1)
-        #N_humanos = self.random.randint(1,12)
-        #if self.schedule.get_agent_count()<2:
-        #    self.running = False
+        pintarNuevosHumanos(self,1)
+        # N_humanos = self.random.randint(1,12)
+        if self.schedule.get_agent_count()<2:
+            self.running = False
         print("---- End of tick ----")
     def getTorniquetesEntrada(self):
         #return [(),(),()]
@@ -136,7 +136,8 @@ def pintarNuevosHumanos(modelo,N_humanos):
             pos_x = GRID_INICIAL_X +1 #Posicion x del humano
             pos_y = GRID_FINAL_Y -2 #GRID_FINAL_Y #Posicion y del humano
             #print("Hello")
-        a = Humano(modelo,(pos_x,pos_y)) #Creacion del humano
-        modelo.schedule.add(a)
-        modelo.grid.place_agent(a, a.pos) #Coloca  en la posicion creada
+        for i in range (0,10):
+            a = Humano(modelo,(pos_x,pos_y)) #Creacion del humano
+            modelo.schedule.add(a)
+            modelo.grid.place_agent(a, a.pos) #Coloca  en la posicion creada
     
