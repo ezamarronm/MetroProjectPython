@@ -14,6 +14,8 @@ XPUERTA2 = math.floor(GRID_FINAL_X * .4)
 XPUERTA3 = math.floor(GRID_FINAL_X * .6)
 XPUERTA4 = math.floor(GRID_FINAL_X * .8)
 
+X_U_INTERIOR1 = math.floor(GRID_FINAL_X * .1)
+
 class miModelo(Model):
     def __init__(self,N_humanos):
         self.running = True
@@ -21,21 +23,28 @@ class miModelo(Model):
         self.grid = MultiGrid(GRID_FINAL_X,GRID_FINAL_Y,False)   
         self.posTorniquetesEntrada = []
         self.posTorniquetesSalida = []
-        self.posTorniquetesPuertas = []
+        self.posPuertas = []
+        self.posUInteriores = calcularUInteriores()
         pintarTorniquetes(self) #Dibuja los torniquetes
         pintarPuertas(self) #Dibuja todas las puertas
         pintarMuros(self);  #Dibuja todos los muros
         pintarHumanos(self,N_humanos)
     def step(self):
+        print("Start tick")
         self.schedule.step()
-        #pintarNuevosHumanos(self,1)
-        #N_humanos = self.random.randint(1,12)
-        #if self.schedule.get_agent_count()<2:
-        #    self.running = False
+        pintarNuevosHumanos(self,1)
+        # N_humanos = self.random.randint(1,12)
+        if self.schedule.get_agent_count()<2:
+            self.running = False
         print("---- End of tick ----")
     def getTorniquetesEntrada(self):
         #return [(),(),()]
         return self.posTorniquetesEntrada
+    def getPuertas(self):
+        #return [(),(),()]
+        return self.posPuertas
+    def getUInteriores(self):
+        return self.posUInteriores
 
 def pintarMuros(modelo):
     pintarMuro(modelo, GRID_INICIAL_X, GRID_FINAL_X, GRID_FINAL_Y - 1, GRID_FINAL_Y - 1) #Superior
@@ -75,7 +84,7 @@ def pintarTorniquetes(modelo):
 def pintarTorniquete(i,modelo, pos_x,pos_y,EoS): #EoS es Entrada (True), Salida (False)
     if EoS:
         a = TorniqueteEntrada(i,modelo,(pos_x,pos_y),True) #True/Transitable False/NoTransitable
-        print("la posicion del torniquete es", a.pos)
+        #print("la posicion del torniquete es", a.pos)
     else:
         a = TorniqueteSalida(i,modelo,(pos_x,pos_y),True)
     modelo.schedule.add(a)
@@ -97,6 +106,7 @@ def pintarPuerta(i,modelo, pos_x,pos_y):
     a = Puerta(i,modelo,(pos_x,pos_y),True)
     modelo.schedule.add(a)
     modelo.grid.place_agent(a, a.pos)
+    modelo.posPuertas.append(a.pos)
 
 def pintarHumanos(modelo,N_humanos):
     contador = 0
@@ -131,7 +141,15 @@ def pintarNuevosHumanos(modelo,N_humanos):
             pos_x = GRID_INICIAL_X +1 #Posicion x del humano
             pos_y = GRID_FINAL_Y -2 #GRID_FINAL_Y #Posicion y del humano
             #print("Hello")
-        a = Humano(modelo,(pos_x,pos_y)) #Creacion del humano
-        modelo.schedule.add(a)
-        modelo.grid.place_agent(a, a.pos) #Coloca  en la posicion creada
-    
+        for i in range (0,10):
+            a = Humano(modelo,(pos_x,pos_y)) #Creacion del humano
+            modelo.schedule.add(a)
+            modelo.grid.place_agent(a, a.pos) #Coloca  en la posicion creada
+def calcularUInteriores():
+    i = .1
+    lista = []
+    while GRID_FINAL_X * i < GRID_FINAL_X:
+        lista.append( ( round (GRID_FINAL_X * i)  , ( math.floor(YMURO_TREN*.5)  )) )
+        i = i + .2
+    return lista
+
