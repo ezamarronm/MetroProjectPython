@@ -3,10 +3,15 @@ from mesa import Agent
 import math
 GRID_INICIAL_X = 0
 GRID_INICIAL_Y = 0
-GRID_FINAL_X = 30
-GRID_FINAL_Y = 30
+GRID_FINAL_X = 50
+GRID_FINAL_Y = 50
 YMURO_TORNIQUETES = GRID_FINAL_Y - math.floor(GRID_FINAL_Y * .3)
 YMURO_TREN = GRID_FINAL_Y - math.floor(GRID_FINAL_Y * .8)
+TIMERABRIR = 30 #A los X tick se abre
+TIMERCERRAR = 15 #A los X ticks se cierra
+HPORPUERTA = 1
+HPORTORNIQUETE = 5
+
 class Construccion(Agent):
     def __init__(self,unique_id, model, pos, transitable):
         super().__init__(unique_id, model)
@@ -14,11 +19,12 @@ class Construccion(Agent):
         self.transitable = transitable
     def get_position(self):
         return self.pos
+    # def step(self):
+    #     print("h")
 
 class Muro(Construccion):
     def __init__(self,unique_id, model, pos,transitable):
         super().__init__(unique_id, model, pos, transitable)
-    # def step(self):
 class TorniqueteEntrada(Construccion):
     def __init__(self,unique_id, model, pos, transitable):
         super().__init__(unique_id, model, pos, transitable)
@@ -28,6 +34,10 @@ class TorniqueteSalida(Construccion):
 class Puerta(Construccion):
     def __init__(self,unique_id, model, pos, transitable):
         super().__init__(unique_id, model, pos, transitable)
+        self.cerrada = True
+        self.contador = 0
+
+    
 
 class Humano(Agent):
     def __init__(self, model, pos):
@@ -79,7 +89,7 @@ class Humano(Agent):
         if torniqueteDestino in destinosPosibles:
             ObjetosEnTorniquete = self.model.grid.get_neighbors(torniqueteDestino,moore=True, include_center=True,radius=0)
             HumanosEnTorniquete = [x for x in ObjetosEnTorniquete if type(x) is Humano and x!=self]
-            if len(HumanosEnTorniquete) > 0:
+            if len(HumanosEnTorniquete) > HPORTORNIQUETE:
                 return [self.pos]
             else:
                 return [torniqueteDestino]
@@ -102,22 +112,24 @@ class Humano(Agent):
         return puertas[ distancias.index(min(distancias)) ] 
 
     def obtenerDestinosPosiblesPuertas(self,puertaDestino):
+            
             destinosPosibles = []
+            puerta = []
             vecindad = self.model.grid.get_neighborhood(self.pos,moore=True,include_center=False, radius = 1)
             for vecino in vecindad:
-                humanosCerca = self.model.grid.get_neighbors(vecino,moore=True, include_center=True,radius=0)
-                vecinos = [x for x in humanosCerca if type(x) is Humano and x!=self]
+                cosasCerca = self.model.grid.get_neighbors(vecino,moore=True, include_center=True,radius=0)
+                vecinos = [x for x in cosasCerca if type(x) is Humano and x!=self]
+                obstaculos = [x for x in cosasCerca if type(x) is not Humano and x!=self if type(x) is not Puerta]               
+                puerta =  [x for x in cosasCerca if type(x) is Puerta]
 
                 if len(vecinos) < 3:
                     destinosPosibles.append(vecino)
-                    obstaculosCerca = self.model.grid.get_neighbors(vecino,moore=True, include_center=True,radius=0)
-                    obstaculos = [x for x in humanosCerca if type(x) is not Humano and x!=self if type(x) is not Puerta] 
                     if len(obstaculos) > 0:
                         destinosPosibles.remove(vecino)
             if puertaDestino in destinosPosibles:
                 ObjetosEnPuerta = self.model.grid.get_neighbors(puertaDestino,moore=True, include_center=True,radius=0)
                 HumanosEnPuerta = [x for x in ObjetosEnPuerta if type(x) is Humano and x!=self]
-                if len(HumanosEnPuerta) > 1:
+                if len(HumanosEnPuerta) > HPORPUERTA:
                     return [self.pos]
                 else:
                     return [puertaDestino]
@@ -145,6 +157,10 @@ class Humano(Agent):
             self.model.schedule.remove(self)
             self.model.grid.remove_agent(self)
             print("Humano eliminado")
+        elif self.model.contador == TIMERCERRAR -1 and self.pos[1] <= YMURO_TREN+1 and not self.model.puertas[0].cerrada:
+            self.model.schedule.remove(self)
+            self.model.grid.remove_agent(self)
+            
         else:
             if self.pos[1] > YMURO_TORNIQUETES and self.direccion == True: #Si esta afuera de los torniquetes
                 torniqueteDestino = self.elegirTorniquete(self.model, self.pos, self.direccion)
@@ -155,15 +171,26 @@ class Humano(Agent):
                 PuertaDestino = self.elegirPuerta(self.model, self.pos)
                 destinosPosibles = self.obtenerDestinosPosiblesPuertas(PuertaDestino)
                 destino = self.obtenerDestino(destinosPosibles,PuertaDestino)
+                if PuertaDestino == destino:
+                    ObjetosEnPuerta = self.model.grid.get_neighbors(destino,moore=True, include_center=True,radius=0)
+                    ListaPuerta = [x for x in ObjetosEnPuerta if type(x) is Puerta]
+                    if ListaPuerta[0].cerrada == True:
+                        destino = self.pos
 
             elif self.pos[1] <= YMURO_TREN and self.direccion == True: #Si estan en la puerta y van a entrar al metro
                 centroDestino = self.elegirUInterior(self.model, self.pos)
                 destinosPosibles = self.obtenerDestinosPosiblesPuertas(centroDestino)
                 destino = self.obtenerDestino(destinosPosibles,centroDestino)
-            elif self.pos[1] < YMURO_TREN and self.direccion == False:
+            elif self.pos[1] < YMURO_TREN and self.direccion == False: #si estan en el tren y van a salir
                 PuertaDestino = self.elegirPuerta(self.model, self.pos)
                 destinosPosibles = self.obtenerDestinosPosiblesPuertas(PuertaDestino)
                 destino = self.obtenerDestino(destinosPosibles,PuertaDestino)
+                if PuertaDestino == destino:
+                    ObjetosEnPuerta = self.model.grid.get_neighbors(destino,moore=True, include_center=True,radius=0)
+                    ListaPuerta = [x for x in ObjetosEnPuerta if type(x) is Puerta]
+                    if ListaPuerta[0].cerrada == True:
+                        destino = self.pos
+
             elif self.pos[1] < YMURO_TORNIQUETES and self.pos[1] >= YMURO_TREN and self.direccion == False: #Si estan dentro de la estacion y van a los torniquetes
                 torniqueteDestino = self.elegirTorniquete(self.model, self.pos, self.direccion)
                 destinosPosibles = self.obtenerDestinosPosibles(torniqueteDestino,self.direccion)

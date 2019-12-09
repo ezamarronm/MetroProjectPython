@@ -5,6 +5,8 @@ from mesa.visualization.UserParam import UserSettableParameter
 from model import miModelo #our model
 from agent import Humano, Muro, TorniqueteEntrada, TorniqueteSalida, Puerta
 from agent import GRID_FINAL_X, GRID_FINAL_Y
+
+N_HUMANOS_INICIALES = 2000
 def agent_portrayal(agent): #here we define the design of agents
     if agent is None:
         print("Algo salio mal...")
@@ -67,4 +69,4 @@ grid = CanvasGrid(agent_portrayal,GRID_FINAL_X,GRID_FINAL_Y,1000,1000)
 server = ModularServer(miModelo,
                        [grid],
                        "Modelo del metro",
-                       {"N_humanos":200})  
+                       {"N_humanos":N_HUMANOS_INICIALES})  
