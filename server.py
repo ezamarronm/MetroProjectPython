@@ -6,7 +6,7 @@ from model import miModelo #our model
 from agent import Humano, Muro, TorniqueteEntrada, TorniqueteSalida, Puerta
 from agent import GRID_FINAL_X, GRID_FINAL_Y
 
-N_HUMANOS_INICIALES = 2000
+N_HUMANOS_INICIALES = 1000
 def agent_portrayal(agent): #here we define the design of agents
     if agent is None:
         print("Algo salio mal...")

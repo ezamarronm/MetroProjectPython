@@ -3,6 +3,7 @@ from mesa.time import RandomActivation
 from mesa.space import MultiGrid
 from agent import Humano, Construccion, Muro, TorniqueteEntrada, TorniqueteSalida, Puerta
 import math
+import time
 from random import randrange
 from agent import GRID_INICIAL_X, GRID_FINAL_X, GRID_INICIAL_Y, GRID_FINAL_Y, YMURO_TORNIQUETES,YMURO_TREN, TIMERABRIR,TIMERCERRAR
 XTORNIQUETE_IZQ = math.floor(GRID_FINAL_X * .3)
@@ -32,6 +33,10 @@ class miModelo(Model):
         self.puertas = []
         self.posUInteriores = calcularUInteriores()
         self.contador = 1
+        self.humanosEntraronTorniquetes = 0
+        self.humanosSalieronTorniquetes = 0
+        self.humanosEntraronVagon = 0
+        self.humanosSalieronVagon = 0
         #self.timer = TIMERABIERTO
         pintarTorniquetes(self) #Dibuja los torniquetes
         pintarPuertas(self) #Dibuja todas las puertas
@@ -45,15 +50,27 @@ class miModelo(Model):
         if self.schedule.get_agent_count()<2:
             self.running = False
         self.contador +=1
+        humanosAEntrar = []
+        humanosASalir = []
         if self.contador == TIMERABRIR and self.puertas[0].cerrada:
+            humanosAEntrar = self.obtenerHumanosEnRango(GRID_INICIAL_X,GRID_FINAL_X, YMURO_TREN,YMURO_TORNIQUETES)
+            print("HUMANOS A ENTRAR ", len(humanosAEntrar))
+            time.sleep(5)
             for puerta in self.puertas:
                 puerta.cerrada =  False
                 self.contador = 0
             pintarHumanos(self, self.random.randint(MIN_H_LLEGANDO_VAGON,MAX_H_LLEGANDO_VAGON), True) #Humanos aleatorio que aparecen en el vagon
         elif self.contador == TIMERCERRAR and not self.puertas[0].cerrada:
-             for puerta in self.puertas:
+            
+            for puerta in self.puertas:
                 puerta.cerrada =  True
-                self.contador = 0        
+                self.contador = 0
+        elif self.contador == TIMERCERRAR -1 and not self.puertas[0].cerrada:
+            humanosEntraron = self.obtenerHumanosEnRango(GRID_INICIAL_X,GRID_FINAL_X, GRID_INICIAL_Y+1,YMURO_TREN)
+            humanosNoEntraron = self.obtenerHumanosEnRango(GRID_INICIAL_X,GRID_FINAL_X, YMURO_TREN,YMURO_TORNIQUETES)
+            print("HUMANOS QUE ENTRARON ", len(humanosEntraron))
+            print("HUMANOS QUE NO ENTRARON", len(humanosNoEntraron))
+            time.sleep(5)
         # if self.contador == self.timer:
         #     for puerta in self.puertas:
         #         puerta.cerrada =  not puerta.cerrada
@@ -63,6 +80,10 @@ class miModelo(Model):
         #         self.timer = 10
         #     pintarHumanos(self, self.random.randint(30,50), True)
         #     self.contador = 0
+        print("Los humanos que han entrado por los torniquetes son ", self.humanosEntraronTorniquetes)
+        print("Los humanos que han salido por los torniquetes son ", self.humanosSalieronTorniquetes)
+        print("Los Humanos que han entrado al vagon son ", self.humanosEntraronVagon)
+        print("Los Humanos que han salido del vagon son ", self.humanosSalieronVagon)
         print("---- End of tick ----")
     def getTorniquetesEntrada(self):
         #return [(),(),()]
@@ -74,7 +95,16 @@ class miModelo(Model):
         return self.posUInteriores
     def getTorniquetesSalida(self):
         return self.posTorniquetesSalida
-    
+    def obtenerHumanosEnRango(self,xinicial,xfinal, yinicial,yfinal):
+        totalHumanos = []
+        for x in range(xinicial,xfinal + 1):
+            for y in range(yinicial,yfinal):
+                pos = (x,y)
+                humanos = self.grid.get_neighbors( pos,moore=True, include_center=True,radius=0)
+                humanos = [x for x in humanos if type(x) is Humano and x.direccion == True]
+                if len(humanos) > 0:
+                    totalHumanos = totalHumanos + humanos
+        return totalHumanos
 
 def pintarMuros(modelo):
     pintarMuro(modelo, GRID_INICIAL_X, GRID_FINAL_X, GRID_FINAL_Y - 1, GRID_FINAL_Y - 1) #Superior
@@ -87,7 +117,7 @@ def pintarMuros(modelo):
 def pintarMuro(modelo, inicial_x, final_x, inicial_y, final_y):
     if inicial_y == final_y: #horizontal
         for i in range(inicial_x,final_x):
-            a = Muro(i,modelo,(i,inicial_y), False)
+            a = Muro(modelo,(i,inicial_y), False)
             vecinos = modelo.grid.get_neighbors(a.pos,moore=True, include_center=True,radius=0)
             vecinos = [x for x in vecinos if type(x) is TorniqueteEntrada or TorniqueteSalida or Puerta]
             if vecinos==[]:
@@ -96,26 +126,26 @@ def pintarMuro(modelo, inicial_x, final_x, inicial_y, final_y):
             
     elif inicial_x == final_x: #vertical
         for i in range(inicial_y,final_y):
-            a = Muro(i,modelo,(inicial_x,i),False)
+            a = Muro(modelo,(inicial_x,i),False)
             modelo.schedule.add(a)
             modelo.grid.place_agent(a, a.pos)
     else:
         print("Algo Salio Mal")
 
 def pintarTorniquetes(modelo):
-    pintarTorniquete(1,modelo,XTORNIQUETE_DER,YMURO_TORNIQUETES,False)
-    pintarTorniquete(1,modelo,XTORNIQUETE_DER+1,YMURO_TORNIQUETES, False)
-    pintarTorniquete(1,modelo,XTORNIQUETE_CTR,YMURO_TORNIQUETES, True)
-    pintarTorniquete(1,modelo,XTORNIQUETE_CTR+1,YMURO_TORNIQUETES, True)
-    pintarTorniquete(1,modelo,XTORNIQUETE_CTR-1,YMURO_TORNIQUETES, True)
-    pintarTorniquete(1,modelo,XTORNIQUETE_IZQ,YMURO_TORNIQUETES, False)
-    pintarTorniquete(1,modelo,XTORNIQUETE_IZQ-1,YMURO_TORNIQUETES, False)
+    pintarTorniquete(modelo,XTORNIQUETE_DER,YMURO_TORNIQUETES,False)
+    pintarTorniquete(modelo,XTORNIQUETE_DER+1,YMURO_TORNIQUETES, False)
+    pintarTorniquete(modelo,XTORNIQUETE_CTR,YMURO_TORNIQUETES, True)
+    pintarTorniquete(modelo,XTORNIQUETE_CTR+1,YMURO_TORNIQUETES, True)
+    pintarTorniquete(modelo,XTORNIQUETE_CTR-1,YMURO_TORNIQUETES, True)
+    pintarTorniquete(modelo,XTORNIQUETE_IZQ,YMURO_TORNIQUETES, False)
+    pintarTorniquete(modelo,XTORNIQUETE_IZQ-1,YMURO_TORNIQUETES, False)
 
-def pintarTorniquete(i,modelo, pos_x,pos_y,EoS): #EoS es Entrada (True), Salida (False)
+def pintarTorniquete(modelo, pos_x,pos_y,EoS): #EoS es Entrada (True), Salida (False)
     if EoS:
-        a = TorniqueteEntrada(i,modelo,(pos_x,pos_y),True) #True/Transitable False/NoTransitable
+        a = TorniqueteEntrada(modelo,(pos_x,pos_y),True) #True/Transitable False/NoTransitable
     else:
-        a = TorniqueteSalida(i,modelo,(pos_x,pos_y),True)
+        a = TorniqueteSalida(modelo,(pos_x,pos_y),True)
     modelo.schedule.add(a)
     modelo.grid.place_agent(a, a.pos)
     if EoS:
@@ -125,14 +155,14 @@ def pintarTorniquete(i,modelo, pos_x,pos_y,EoS): #EoS es Entrada (True), Salida 
 
 def pintarPuertas(modelo):
     for i in range(-1,2):
-        pintarPuerta(1,modelo,XPUERTA1 + i ,YMURO_TREN)
-        pintarPuerta(1,modelo,XPUERTA2 + i ,YMURO_TREN)
-        pintarPuerta(1,modelo,XPUERTA3 + i ,YMURO_TREN)
-        pintarPuerta(1,modelo,XPUERTA4 + i ,YMURO_TREN)
+        pintarPuerta(modelo,XPUERTA1 + i ,YMURO_TREN)
+        pintarPuerta(modelo,XPUERTA2 + i ,YMURO_TREN)
+        pintarPuerta(modelo,XPUERTA3 + i ,YMURO_TREN)
+        pintarPuerta(modelo,XPUERTA4 + i ,YMURO_TREN)
 
 
-def pintarPuerta(i,modelo, pos_x,pos_y):
-    a = Puerta(i,modelo,(pos_x,pos_y),True)
+def pintarPuerta(modelo, pos_x,pos_y):
+    a = Puerta(modelo,(pos_x,pos_y),True)
     modelo.schedule.add(a)
     modelo.grid.place_agent(a, a.pos)
     modelo.posPuertas.append(a.pos)
@@ -143,7 +173,7 @@ def pintarHumanos(modelo,N_humanos,step):
     while contador < N_humanos:
         if step == False:
             pos_x = modelo.random.randint(GRID_INICIAL_X + 1,GRID_FINAL_X - 2) #Posicion x del humano
-            pos_y = modelo.random.randint(GRID_INICIAL_Y + 1 ,GRID_FINAL_Y - 2) #Posicion y del humano
+            pos_y = modelo.random.randint(YMURO_TREN + 1 ,GRID_FINAL_Y - 2) #Posicion y del humano
         else:
             pos_x = modelo.random.randint(GRID_INICIAL_X + 1,GRID_FINAL_X - 2) #Posicion x del humano
             pos_y = modelo.random.randint(GRID_INICIAL_Y + 1 ,YMURO_TREN - 1) #Posicion y del humano
@@ -190,3 +220,6 @@ def calcularUInteriores():
         i = i + .2
     return lista
 
+
+def prueba(modelo):
+    return 50

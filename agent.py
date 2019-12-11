@@ -13,8 +13,8 @@ HPORPUERTA = 1
 HPORTORNIQUETE = 5
 
 class Construccion(Agent):
-    def __init__(self,unique_id, model, pos, transitable):
-        super().__init__(unique_id, model)
+    def __init__(self,model, pos, transitable):
+        super().__init__(self,model)
         self.pos = pos
         self.transitable = transitable
     def get_position(self):
@@ -23,19 +23,37 @@ class Construccion(Agent):
     #     print("h")
 
 class Muro(Construccion):
-    def __init__(self,unique_id, model, pos,transitable):
-        super().__init__(unique_id, model, pos, transitable)
+    def __init__(self, model, pos,transitable):
+        super().__init__( model, pos, transitable)
+    #def step(self):
+        #print("Soy un muro") 
 class TorniqueteEntrada(Construccion):
-    def __init__(self,unique_id, model, pos, transitable):
-        super().__init__(unique_id, model, pos, transitable)
+    def __init__(self, model, pos, transitable):
+        super().__init__(model, pos, transitable)
+    # def step(self):
+    #     humanosDentro = self.model.grid.get_neighbors(self.pos,moore=True, include_center=True,radius=0)
+    #     humanosDentro = [x for x in humanosDentro if type(x) is Humano]   
+    #     self.model.humanosEntraronTorniquetes += len(humanosDentro)
 class TorniqueteSalida(Construccion):
-    def __init__(self,unique_id, model, pos, transitable):
-        super().__init__(unique_id, model, pos, transitable)
+    def __init__(self, model, pos, transitable):
+        super().__init__(model, pos, transitable)
+    # def step(self):
+    #     humanosDentro = self.model.grid.get_neighbors(self.pos,moore=True, include_center=True,radius=0)  
+    #     humanosDentro = [x for x in humanosDentro if type(x) is Humano]   
+    #     self.model.humanosSalieronTorniquetes += len(humanosDentro) 
 class Puerta(Construccion):
-    def __init__(self,unique_id, model, pos, transitable):
-        super().__init__(unique_id, model, pos, transitable)
+    def __init__(self, model, pos, transitable):
+        super().__init__( model, pos, transitable)
         self.cerrada = True
         self.contador = 0
+    # def step(self):
+    #     humanosDentro = self.model.grid.get_neighbors(self.pos,moore=True, include_center=True,radius=0)  
+    #     humanosDentroSaliendo = [x for x in humanosDentro if type(x) is Humano and x.direccion == False]
+    #     humanosDentroEntrando = [x for x in humanosDentro if type(x) is Humano and x.direccion == True]
+    #     self.model.humanosSalieronVagon += len(humanosDentroSaliendo)
+    #     self.model.humanosEntraronVagon += len(humanosDentroEntrando)
+        #humanosDentro = self.model.grid.get_neighbors(self.pos,moore=True, include_center=True,radius=0)  
+        #self.model.humanosSalieronVagon+=1
 
     
 
@@ -44,6 +62,10 @@ class Humano(Agent):
         super().__init__(self,model)
         self.pos = pos
         self.direccion = self.set_direction()
+        self.pasoTorniqueteEntrada = False
+        self.pasoTorniqueteSalida = False
+        self.salioVagon = False
+        self.entroVagon = False
 
     def get_position(self):
         return self.pos
@@ -153,11 +175,26 @@ class Humano(Agent):
     # EN CADA TICK
     #
     def step(self):
+        if self.pos in self.model.posPuertas and self.direccion and not self.entroVagon:
+            self.entroVagon = True
+            self.model.humanosEntraronVagon+=1
+        elif self.pos in self.model.posPuertas and not self.direccion and not self.salioVagon:
+            self.salioVagon = True
+            self.model.humanosSalieronVagon+=1
+        elif self.pos in self.model.posTorniquetesEntrada and self.direccion and not self.pasoTorniqueteEntrada:
+            self.pasoTorniqueteEntrada = True
+            self.model.humanosEntraronTorniquetes+=1
+        elif self.pos in self.model.posTorniquetesSalida and not self.direccion and not self.pasoTorniqueteEntrada:
+            self.pasoTorniqueteSalida = True
+            self.model.humanosSalieronTorniquetes+=1
         if self.pos[0] == GRID_INICIAL_X or self.pos[0] == GRID_FINAL_X -1  or self.pos[1] == GRID_INICIAL_Y or self.pos[1] == GRID_FINAL_Y -1:
             self.model.schedule.remove(self)
             self.model.grid.remove_agent(self)
-            print("Humano eliminado")
-        elif self.model.contador == TIMERCERRAR -1 and self.pos[1] <= YMURO_TREN+1 and not self.model.puertas[0].cerrada:
+            #print("Humano eliminado")
+        elif self.model.contador == TIMERCERRAR -1 and self.pos[1] < YMURO_TREN +1 and not self.model.puertas[0].cerrada:
+            self.model.schedule.remove(self)
+            self.model.grid.remove_agent(self)
+        elif self.model.contador == TIMERCERRAR -1 and self.pos[1] == YMURO_TREN +1 and not self.model.puertas[0].cerrada and self.direccion:
             self.model.schedule.remove(self)
             self.model.grid.remove_agent(self)
             
