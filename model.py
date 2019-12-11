@@ -1,42 +1,42 @@
-from mesa import Model
-from mesa.time import RandomActivation
+from mesa import Model #importamos paquete mesa 
+from mesa.time import RandomActivation 
 from mesa.space import MultiGrid
 from agent import Humano, Construccion, Muro, TorniqueteEntrada, TorniqueteSalida, Puerta
-import math
-import time
-from random import randrange
+import math #importa funciones básicas de matemáticas
+import time #importa función sleep
+from random import randrange # importa paquete para elegir números aleatorios
 from agent import GRID_INICIAL_X, GRID_FINAL_X, GRID_INICIAL_Y, GRID_FINAL_Y, YMURO_TORNIQUETES,YMURO_TREN, TIMERABRIR,TIMERCERRAR
-XTORNIQUETE_IZQ = math.floor(GRID_FINAL_X * .3)
+#importa las constantes del archivo agentes
+XTORNIQUETE_IZQ = math.floor(GRID_FINAL_X * .3) #posición en X de los tres torniquetes
 XTORNIQUETE_CTR = math.floor(GRID_FINAL_X * .5)
 XTORNIQUETE_DER = math.floor(GRID_FINAL_X * .7)
 
-XPUERTA1 = math.floor(GRID_FINAL_X * .2)
+XPUERTA1 = math.floor(GRID_FINAL_X * .2) #Posición en X de las cuatro puertas
 XPUERTA2 = math.floor(GRID_FINAL_X * .4)
 XPUERTA3 = math.floor(GRID_FINAL_X * .6)
 XPUERTA4 = math.floor(GRID_FINAL_X * .8)
 
-X_U_INTERIOR1 = math.floor(GRID_FINAL_X * .1)
+X_U_INTERIOR1 = math.floor(GRID_FINAL_X * .1) #Posición en X a donde se dirigen los agentes al interior del vagón
+H_ENTRANDO_ARRIBA = 10 #La cantidad de humanos que van apareciendo y se dirigen a los torniquetes
+MIN_H_LLEGANDO_VAGON = 30 #Cabtidad mínima de humanos que llegan dentro del vagón
+MAX_H_LLEGANDO_VAGON = 50 #CAntidad máxima de humanos que llegan dentro del vagón
 
-H_ENTRANDO_ARRIBA = 10
-MIN_H_LLEGANDO_VAGON = 30
-MAX_H_LLEGANDO_VAGON = 50
 
-
-class miModelo(Model):
-    def __init__(self,N_humanos):
-        self.running = True
-        self.schedule = RandomActivation(self)        
-        self.grid = MultiGrid(GRID_FINAL_X,GRID_FINAL_Y,False)   
-        self.posTorniquetesEntrada = []
-        self.posTorniquetesSalida = []
-        self.posPuertas = []
-        self.puertas = []
-        self.posUInteriores = calcularUInteriores()
-        self.contador = 1
-        self.humanosEntraronTorniquetes = 0
-        self.humanosSalieronTorniquetes = 0
-        self.humanosEntraronVagon = 0
-        self.humanosSalieronVagon = 0
+class miModelo(Model): #definimos la clase miModelo
+    def __init__(self,N_humanos): #constructor, metemos el argumento Número Humanos iniciales
+        self.running = True #permite la ejecución continua 
+        self.schedule = RandomActivation(self) # elige el tipo de schedule      
+        self.grid = MultiGrid(GRID_FINAL_X,GRID_FINAL_Y,False) #tipo y tamaño de grid  
+        self.posTorniquetesEntrada = [] #guarda las posiciones de los torniquites de entrada
+        self.posTorniquetesSalida = [] #guarda las posiciones de los torniquites de salida
+        self.posPuertas = [] #guarda las posiciones de las puertas
+        self.puertas = [] #guarda los objetos puerta
+        self.posUInteriores = calcularUInteriores() #te calcula todas las posiciones interios del vagón a donde se dirigen los usuarios
+        self.contador = 1 # contador de ticks para abrir y cerrar puertas
+        self.humanosEntraronTorniquetes = 0 #contador para humanos que entran a torniquetes
+        self.humanosSalieronTorniquetes = 0 #contador para humanos que entran a torniquetes
+        self.humanosEntraronVagon = 0 #contador para humanos que entran a torniquetes
+        self.humanosSalieronVagon = 0 #contador para humanos que entran a torniquetes
         #self.timer = TIMERABIERTO
         pintarTorniquetes(self) #Dibuja los torniquetes
         pintarPuertas(self) #Dibuja todas las puertas
